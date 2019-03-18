@@ -64,19 +64,23 @@ server.delete("/users/:id", (req, res) => {
 
 server.put("/users/:id", (req, res) => {
   const { id } = req.params;
-  const changes = req.body;
+  const user = req.body;
 
-  db.update(id, changes)
+  db.update(id, user)
 
     .then(updated => {
       if (updated) {
         res.status(200).json(updated);
       } else {
-        res.status(404).json({ message: "user not found" });
+        res
+          .status(400)
+          .json({ message: "Please provide name and bio for the user." });
       }
     })
     .catch(error => {
-      res.status(500).json({ message: "error updating user" });
+      res
+        .status(500)
+        .json({ message: "The user information could not be modified." });
     });
 });
 
