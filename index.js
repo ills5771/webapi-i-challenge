@@ -34,4 +34,31 @@ server.get("/users/:id", (req, res) => {
     });
 });
 
+server.post("/users", (req, res) => {
+  const newUser = req.body;
+  console.log("user information", newUser);
+  db.insert(newUser)
+    .then(user => {
+      res.status(201).json(user);
+    })
+    .catch(error => {
+      res.status(500).json({
+        message: "There was an error while saving the user to the database"
+      });
+    });
+});
+
+server.delete("/users/:id", (req, res) => {
+  const id = req.params.id;
+  db.remove(id)
+    .then(deleted => {
+      res.status(204).end();
+    })
+    .catch(error => {
+      res.status(500).json({
+        message: "The user could not be removed"
+      });
+    });
+});
+
 server.listen(8000, () => console.log("API running on port 8000"));
