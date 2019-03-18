@@ -4,6 +4,7 @@ const express = require("express");
 const db = require("./data/db.js");
 
 const server = express();
+server.use(express.json());
 
 server.get("/", (req, res) => {
   res.send("Hello World");
@@ -58,6 +59,24 @@ server.delete("/users/:id", (req, res) => {
       res.status(500).json({
         message: "The user could not be removed"
       });
+    });
+});
+
+server.put("/users/:id", (req, res) => {
+  const { id } = req.params;
+  const changes = req.body;
+
+  db.update(id, changes)
+
+    .then(updated => {
+      if (updated) {
+        res.status(200).json(updated);
+      } else {
+        res.status(404).json({ message: "user not found" });
+      }
+    })
+    .catch(error => {
+      res.status(500).json({ message: "error updating user" });
     });
 });
 
