@@ -1,5 +1,3 @@
-// implement your API here
-
 const express = require("express");
 const db = require("./data/db.js");
 
@@ -37,16 +35,21 @@ server.get("/users/:id", (req, res) => {
 
 server.post("/users", (req, res) => {
   const newUser = req.body;
-  console.log("user information", newUser);
-  db.insert(newUser)
-    .then(user => {
-      res.status(201).json(user);
-    })
-    .catch(error => {
-      res.status(500).json({
-        message: "There was an error while saving the user to the database"
+  if (newUser.name && newUser.bio) {
+    db.insert(newUser)
+      .then(user => {
+        res.status(201).json(user);
+      })
+      .catch(error => {
+        res.status(500).json({
+          message: "There was an error while saving the user to the database"
+        });
       });
-    });
+  } else {
+    res
+      .status(400)
+      .json({ message: "Please provide name and bio for the user." });
+  }
 });
 
 server.delete("/users/:id", (req, res) => {
