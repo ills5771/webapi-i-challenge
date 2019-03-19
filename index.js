@@ -54,37 +54,50 @@ server.post("/users", (req, res) => {
 
 server.delete("/users/:id", (req, res) => {
   const id = req.params.id;
-  db.remove(id)
-    .then(deleted => {
-      res.status(204).end();
-    })
-    .catch(error => {
-      res.status(500).json({
-        message: "The user could not be removed"
+  const user = req.body;
+
+  if (user.length > 0) {
+    db.remove(id)
+      .then(deleted => {
+        res.status(204).end();
+      })
+      .catch(error => {
+        res.status(500).json({
+          message: "The user could not be removed"
+        });
       });
-    });
+  } else {
+    res
+      .status(404)
+      .json({ message: "The user with the specified ID does not exist." });
+  }
 });
 
 server.put("/users/:id", (req, res) => {
   const { id } = req.params;
   const user = req.body;
+  if (user.name && user.bio) {
+    db.update(id, user)
 
-  db.update(id, user)
-
-    .then(updated => {
-      if (updated) {
-        res.status(200).json(updated);
-      } else {
+      .then(updated => {
+        if (updated) {
+          res.status(200).json(updated);
+        } else {
+          res.status(404).json({
+            message: "The user with the specified ID does not exist."
+          });
+        }
+      })
+      .catch(error => {
         res
-          .status(400)
-          .json({ message: "Please provide name and bio for the user." });
-      }
-    })
-    .catch(error => {
-      res
-        .status(500)
-        .json({ message: "The user information could not be modified." });
-    });
+          .status(500)
+          .json({ message: "The user information could not be modified." });
+      });
+  } else {
+    res
+      .status(400)
+      .json({ message: "Please provide name and bio for the user." });
+  }
 });
 
 server.listen(8000, () => console.log("API running on port 8000"));
