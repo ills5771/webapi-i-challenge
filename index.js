@@ -20,17 +20,21 @@ server.get("/users", (req, res) => {
     });
 });
 
-server.get("/users/:id", (req, res) => {
-  const id = req.params.id;
-  db.findById(id)
-    .then(users => {
-      res.status(200).json(users);
-    })
-    .catch(error => {
+server.get("/users/:id", async (req, res) => {
+  try {
+    const user = await db.findById(req.params.id);
+    if (user) {
+      res.status(200).json(user);
+    } else {
       res
-        .status(500)
-        .json({ message: "The user information could not be retrieved." });
-    });
+        .status(404)
+        .json({ message: "The user with the specified ID does not exist." });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "The user information could not be retrieved." });
+  }
 });
 
 server.post("/users", (req, res) => {
@@ -51,25 +55,18 @@ server.post("/users", (req, res) => {
       .json({ message: "Please provide name and bio for the user." });
   }
 });
-
-server.delete("/users/:id", (req, res) => {
-  const id = req.params.id;
-  const user = req.body;
-
-  if (user.length > 0) {
-    db.remove(id)
-      .then(deleted => {
-        res.status(204).end();
-      })
-      .catch(error => {
-        res.status(500).json({
-          message: "The user could not be removed"
-        });
-      });
-  } else {
-    res
-      .status(404)
-      .json({ message: "The user with the specified ID does not exist." });
+server.delete("/users/:id", async (req, res) => {
+  try {
+    const user = await db.remove(req.params.id);
+    if (user > 0) {
+      res.status(204).end();
+    } else {
+      res
+        .status(404)
+        .json({ message: "The user with the specified ID does not exist." });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "The user could not be removed" });
   }
 });
 
